@@ -3,8 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 permissions:
   contents: read
@@ -13,10 +11,10 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
-  deploy:
+  build-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -27,6 +25,16 @@ jobs:
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
+        
+      - name: Build static site
+        run: |
+          echo "Building static site..."
+          # Ensure index.html is in the root
+          if [ ! -f "index.html" ]; then
+            echo "Error: index.html not found!"
+            exit 1
+          fi
+          echo "Static site build complete"
         
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
